@@ -25,7 +25,7 @@ function rng(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '1mb'}))
 app.use(express.static(__dirname + '/public'))
 
 app.get('/', function(req, res) {
@@ -34,18 +34,12 @@ app.get('/', function(req, res) {
 
 
 app.post('/service', function(req, res) {
-  // if ( req.headers['content-length'] > 1048576) {
-  //   // res.status(413).end()
-  // }
   var imgBuff = dataUriToBuffer(req.body.content)
-  console.log(imgBuff)
-  console.log(noises.random())
   gm(imgBuff).noise(noises.random())
     .contrast(-6)
     .colorize(rng(0,256), rng(0,256), rng(0,256))
     .stream()
     .pipe(concat(function(goob){
-      console.log(goob)
       res.json({content: 'data:' + imgBuff.type + ';base64,' + goob.toString('base64')})
     }))
 })
